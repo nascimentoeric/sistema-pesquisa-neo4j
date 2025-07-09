@@ -20,9 +20,9 @@ public class InstituicaoModel {
     public void create(InstituicaoBean a) {
         try (Session session = driver.session()) {
             session.writeTransaction(tx -> {
-                tx.run("CREATE (i:Instituicao {id: $id, nome: $nome, tipo: $tipo, pais: $pais})",
+                tx.run("CREATE (i:Instituicao {idInstituicao: $idInstituicao, nome: $nome, tipo: $tipo, pais: $pais})",
                         parameters(
-                                "id", a.getIdInstituicao(),
+                                "idInstituicao", a.getIdInstituicao(),
                                 "nome", a.getNome(),
                                 "tipo", a.getTipo(),
                                 "pais", a.getPais()
@@ -36,11 +36,11 @@ public class InstituicaoModel {
         HashSet<InstituicaoBean> list = new HashSet<>();
         try (Session session = driver.session()) {
             session.readTransaction(tx -> {
-                Result result = tx.run("MATCH (i:Instituicao) RETURN i.id AS id, i.nome AS nome, i.tipo AS tipo, i.pais AS pais ORDER BY i.id");
+                Result result = tx.run("MATCH (i:Instituicao) RETURN i.idInstituicao AS idInstituicao, i.nome AS nome, i.tipo AS tipo, i.pais AS pais ORDER BY i.id");
                 while (result.hasNext()) {
                     Record record = result.next();
                     InstituicaoBean inst = new InstituicaoBean(
-                            record.get("id").asInt(),
+                            record.get("idInstituicao").asInt(),
                             record.get("nome").asString(),
                             record.get("tipo").asString(),
                             record.get("pais").asString()
@@ -56,8 +56,8 @@ public class InstituicaoModel {
     public void remove(int id) {
         try (Session session = driver.session()) {
             session.writeTransaction(tx -> {
-                tx.run("MATCH (i:Instituicao {id: $id}) DETACH DELETE i",
-                        parameters("id", id));
+                tx.run("MATCH (i:Instituicao {idInstituicao: $idInstituicao}) DETACH DELETE i",
+                        parameters("idInstituicao", id));
                 return null;
             });
         }
@@ -66,10 +66,10 @@ public class InstituicaoModel {
     public void update(InstituicaoBean a) {
         try (Session session = driver.session()) {
             session.writeTransaction(tx -> {
-                tx.run("MATCH (i:Instituicao {id: $id}) " +
+                tx.run("MATCH (i:Instituicao {idInstituicao: $idInstituicao}) " +
                                 "SET i.nome = $nome, i.tipo = $tipo, i.pais = $pais",
                         parameters(
-                                "id", a.getIdInstituicao(),
+                                "idInstituicao", a.getIdInstituicao(),
                                 "nome", a.getNome(),
                                 "tipo", a.getTipo(),
                                 "pais", a.getPais()

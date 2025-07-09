@@ -39,7 +39,7 @@ public class PublicacaoModel {
                         "idPublicacao", newId,
                         "titulo", p.getTitulo(),
                         "tipo", p.getTipo(),
-                        "dataPublicacao", p.getDataPublicacao().toString(),
+                        "dataPublicacao", p.getDataPublicacao().toLocalDate(),
                         "doi", p.getDoi()
                 ));
                 return null;
@@ -65,7 +65,7 @@ public class PublicacaoModel {
                             rec.get("idProjeto").asInt(),
                             pubNode.get("titulo").asString(),
                             pubNode.get("tipo").asString(),
-                            Date.valueOf(pubNode.get("dataPublicacao").asString()),
+                            Date.valueOf(pubNode.get("dataPublicacao").asLocalDate().toString()),
                             pubNode.get("doi").asString()
                     );
                     lista.add(p);

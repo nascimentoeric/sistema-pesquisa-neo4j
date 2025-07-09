@@ -29,10 +29,10 @@ public class OrientandoController {
         System.out.print("Nível Acadêmico: ");
         String nivel = input.nextLine();
 
-        System.out.print("ID do Projeto: ");
-        int idProjeto = input.nextInt();
+//        System.out.print("ID do Projeto: ");
+//        int idProjeto = input.nextInt();
 
-        OrientandoBean o = new OrientandoBean(idOrientando, nome, email, nivel, idProjeto);
+        OrientandoBean o = new OrientandoBean(idOrientando, nome, email, nivel);
         model.create(o);
 
         System.out.println("Orientando cadastrado com sucesso!");
@@ -71,10 +71,10 @@ public class OrientandoController {
         System.out.print("Novo nível acadêmico: ");
         String nivel = input.nextLine();
 
-        System.out.print("Novo ID do Projeto: ");
-        int idProjeto = input.nextInt();
+//        System.out.print("Novo ID do Projeto: ");
+//        int idProjeto = input.nextInt();
 
-        OrientandoBean o = new OrientandoBean(idOrientando, nome, email, nivel, idProjeto);
+        OrientandoBean o = new OrientandoBean(idOrientando, nome, email, nivel);
         model.update(o);
         System.out.println("Orientando atualizado com sucesso.");
     }

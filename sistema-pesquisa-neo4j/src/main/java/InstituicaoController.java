@@ -28,9 +28,9 @@ public class InstituicaoController {
 
         try (Session session = driver.session()) {
             session.writeTransaction(tx -> {
-                tx.run("CREATE (i:Instituicao {id: $id, nome: $nome, tipo: $tipo, pais: $pais})",
+                tx.run("CREATE (i:Instituicao {idInstituicao: $idInstituicao, nome: $nome, tipo: $tipo, pais: $pais})",
                         org.neo4j.driver.Values.parameters(
-                                "id", id,
+                                "idInstituicao", id,
                                 "nome", nome,
                                 "tipo", tipo,
                                 "pais", pais
@@ -45,11 +45,11 @@ public class InstituicaoController {
     public void listarInstituicoes() {
         try (Session session = driver.session()) {
             session.readTransaction(tx -> {
-                Result result = tx.run("MATCH (i:Instituicao) RETURN i.id AS id, i.nome AS nome, i.tipo AS tipo, i.pais AS pais ORDER BY i.id");
+                Result result = tx.run("MATCH (i:Instituicao) RETURN i.idInstituicao AS idInstituicao, i.nome AS nome, i.tipo AS tipo, i.pais AS pais ORDER BY i.id");
                 while (result.hasNext()) {
                     Record record = result.next();
                     System.out.printf("ID: %d | Nome: %s | Tipo: %s | País: %s\n",
-                            record.get("id").asInt(),
+                            record.get("idInstituicao").asInt(),
                             record.get("nome").asString(),
                             record.get("tipo").asString(),
                             record.get("pais").asString()
@@ -68,7 +68,7 @@ public class InstituicaoController {
 
         try (Session session = driver.session()) {
             session.writeTransaction(tx -> {
-                tx.run("MATCH (i:Instituicao {id: $id}) DETACH DELETE i",
+                tx.run("MATCH (i:Instituicao {idInstituicao: $idInstituicao}) DETACH DELETE i",
                         org.neo4j.driver.Values.parameters("id", id));
                 return null;
             });
@@ -92,10 +92,10 @@ public class InstituicaoController {
 
         try (Session session = driver.session()) {
             session.writeTransaction(tx -> {
-                tx.run("MATCH (i:Instituicao {id: $id}) " +
+                tx.run("MATCH (i:Instituicao {idInstituicao: $idInstituicao}) " +
                                 "SET i.nome = $nome, i.tipo = $tipo, i.pais = $pais",
                         org.neo4j.driver.Values.parameters(
-                                "id", id,
+                                "idInstituicao", id,
                                 "nome", nome,
                                 "tipo", tipo,
                                 "pais", pais
