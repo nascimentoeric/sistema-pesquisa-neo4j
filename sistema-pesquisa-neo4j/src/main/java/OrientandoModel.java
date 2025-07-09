@@ -14,13 +14,13 @@ public class OrientandoModel {
     public void create(OrientandoBean o) {
         try (Session session = driver.session()) {
             session.writeTransaction(tx -> {
-                tx.run("CREATE (o:Orientando {id: $id, nome: $nome, email: $email, nivel: $nivel, idProjeto: $idProjeto})",
+                tx.run("CREATE (o:Orientando {idOrientando: $idOrientando, nome: $nome, email: $email, nivelAcademico: $nivelAcademico})",
                         Values.parameters(
-                                "id", o.getIdOrientando(),
+                                "idOrientando", o.getIdOrientando(),
                                 "nome", o.getNome(),
                                 "email", o.getEmail(),
-                                "nivel", o.getNivelAcademico(),
-                                "idProjeto", o.getIdProjeto()
+                                "nivelAcademico", o.getNivelAcademico()
+                                //"idProjeto", o.getIdProjeto()
                         ));
                 return null;
             });
@@ -37,11 +37,11 @@ public class OrientandoModel {
                     Record record = result.next();
                     Value node = record.get("o");
                     OrientandoBean o = new OrientandoBean(
-                            node.get("id").asInt(),
+                            node.get("idOrientando").asInt(),
                             node.get("nome").asString(),
                             node.get("email").asString(),
-                            node.get("nivel").asString(),
-                            node.get("idProjeto").asInt()
+                            node.get("nivelAcademico").asString()
+                            //node.get("idProjeto").asInt()
                     );
                     list.add(o);
                 }
@@ -55,8 +55,8 @@ public class OrientandoModel {
     public void remove(int id) {
         try (Session session = driver.session()) {
             session.writeTransaction(tx -> {
-                tx.run("MATCH (o:Orientando {id: $id}) DETACH DELETE o",
-                        Values.parameters("id", id));
+                tx.run("MATCH (o:Orientando {idOrientando: $idOrientando}) DETACH DELETE o",
+                        Values.parameters("idOrientando", id));
                 return null;
             });
         }
@@ -65,14 +65,14 @@ public class OrientandoModel {
     public void update(OrientandoBean o) {
         try (Session session = driver.session()) {
             session.writeTransaction(tx -> {
-                tx.run("MATCH (ori:Orientando {id: $id}) " +
-                                "SET ori.nome = $nome, ori.email = $email, ori.nivel = $nivel, ori.idProjeto = $idProjeto",
+                tx.run("MATCH (ori:Orientando {idOrientando: $idOrientando}) " +
+                                "SET ori.nome = $nome, ori.email = $email, ori.nivelAcademico = $nivelAcademico",
                         Values.parameters(
-                                "id", o.getIdOrientando(),
+                                "idOrientando", o.getIdOrientando(),
                                 "nome", o.getNome(),
                                 "email", o.getEmail(),
-                                "nivel", o.getNivelAcademico(),
-                                "idProjeto", o.getIdProjeto()
+                                "nivelAcademico", o.getNivelAcademico()
+                                //"idProjeto", o.getIdProjeto()
                         ));
                 return null;
             });

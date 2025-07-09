@@ -34,7 +34,7 @@ public class FinanciaController {
 
     public void listarFinanciamentos() {
         Set<FinanciaBean> todos = model.listAll();
-        System.out.println("ID Instituição | Instituição | ID Projeto | Projeto");
+        // System.out.println("ID Instituição | Instituição | ID Projeto | Projeto");
         System.out.println("------------------------------------------------------------");
 
         for (FinanciaBean f : todos) {
@@ -65,7 +65,6 @@ public class FinanciaController {
     }
 
     public void listarProjetosComInstituicoesFinanciadas() {
-        // Como o listAll já retorna essa info, apenas reaproveitamos:
         listarFinanciamentos();
     }
 }

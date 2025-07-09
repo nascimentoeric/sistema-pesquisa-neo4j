@@ -3,14 +3,14 @@ public class OrientandoBean {
     private String nome;
     private String email;
     private String nivelAcademico;
-    private int idProjeto;
+    //private int idProjeto;
 
-    public OrientandoBean(int idOrientando, String nome, String email, String nivelAcademico, int idProjeto) {
+    public OrientandoBean(int idOrientando, String nome, String email, String nivelAcademico) {
         this.idOrientando = idOrientando;
         this.nome = nome;
         this.email = email;
         this.nivelAcademico = nivelAcademico;
-        this.idProjeto = idProjeto;
+        //this.idProjeto = idProjeto;
     }
 
     public int getIdOrientando() {
@@ -45,16 +45,16 @@ public class OrientandoBean {
         this.nivelAcademico = nivelAcademico;
     }
 
-    public int getIdProjeto() {
-        return idProjeto;
-    }
-
-    public void setIdProjeto(int idProjeto) {
-        this.idProjeto = idProjeto;
-    }
+//    public int getIdProjeto() {
+//        return idProjeto;
+//    }
+//
+//    public void setIdProjeto(int idProjeto) {
+//        this.idProjeto = idProjeto;
+//    }
 
     @Override
     public String toString() {
-        return "Orientando: " + nome + " | Nível: " + nivelAcademico;
+        return "ID: "+ idOrientando + " | Orientando: " + nome + " | Email: " + email + " | Nível: " + nivelAcademico;
     }
 }

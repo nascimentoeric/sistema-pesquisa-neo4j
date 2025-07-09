@@ -67,6 +67,11 @@ public class PublicacaoBean {
 
     @Override
     public String toString() {
-        return "ID: " + idPublicacao + " | Publicação: " + titulo + " | Tipo: " + tipo + " | DOI: " + doi;
+        return "ID: " + idPublicacao +
+                " | Publicação: " + titulo +
+                " | Tipo: " + tipo +
+                " | Data: " + (dataPublicacao != null ? dataPublicacao.toString() : "sem data") +
+                " | DOI: " + doi;
     }
+
 }

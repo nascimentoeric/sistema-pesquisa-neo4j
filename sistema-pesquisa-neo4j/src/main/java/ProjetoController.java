@@ -1,4 +1,7 @@
 import org.neo4j.driver.Driver;
+import org.neo4j.driver.Record;
+import org.neo4j.driver.Result;
+import org.neo4j.driver.Session;
 
 import java.sql.Date;
 import java.util.Scanner;
@@ -44,7 +47,7 @@ public class ProjetoController {
 
         int idProjeto = model.getNextId();
 
-        ProjetoBean projeto = new ProjetoBean(idProjeto, idCoordenador, idInstituicao, titulo, areaPesquisa, dataInicio, dataFim);
+        ProjetoBean projeto = new ProjetoBean(idProjeto, titulo, areaPesquisa, dataInicio, dataFim);
         model.create(projeto);
 
         System.out.println("Projeto cadastrado com sucesso!");
@@ -52,7 +55,7 @@ public class ProjetoController {
 
     public void listarProjetos() {
         Set<ProjetoBean> todos = model.listAll();
-        System.out.println("ID | Coordenador | Instituição | Título | Área Pesquisa | Data Início | Data Fim");
+        System.out.println("ID | Título | Área Pesquisa | Data Início | Data Fim");
         System.out.println("---------------------------------------------------------------------------------");
         for (ProjetoBean p : todos) {
             System.out.println(p);
@@ -69,4 +72,42 @@ public class ProjetoController {
         model.remove(idProjeto);
         System.out.println("Projeto removido com sucesso.");
     }
+
+    public void listarProjetosComPesquisadoresParticipantes() {
+        try (Session session = model.getDriver().session()) {
+            session.readTransaction(tx -> {
+                String cypher = """
+                MATCH (pesq:Pesquisador)-[:PARTICIPA]->(proj:Projeto)
+                RETURN proj.idProjeto AS idProjeto, proj.titulo AS titulo,
+                       pesq.idPesquisador AS idPesquisador, pesq.nome AS nomePesquisador
+                ORDER BY proj.idProjeto, pesq.nome
+            """;
+
+                Result result = tx.run(cypher);
+
+                System.out.println("\n--- Projetos com Pesquisadores Participantes ---\n");
+
+                int lastProjetoId = -1;
+                while (result.hasNext()) {
+                    Record rec = result.next();
+                    int idProjeto = rec.get("idProjeto").asInt();
+
+                    if (idProjeto != lastProjetoId) {
+                        System.out.printf("\nProjeto ID: %d | Título: %s\n", idProjeto, rec.get("titulo").asString());
+                        System.out.println("Pesquisadores Participantes:");
+                        lastProjetoId = idProjeto;
+                    }
+
+                    System.out.printf("   - [%d] %s\n",
+                            rec.get("idPesquisador").asInt(),
+                            rec.get("nomePesquisador").asString());
+                }
+
+                return null;
+            });
+        } catch (Exception e) {
+            System.out.println("Erro ao listar projetos com pesquisadores: " + e.getMessage());
+        }
+    }
+
 }

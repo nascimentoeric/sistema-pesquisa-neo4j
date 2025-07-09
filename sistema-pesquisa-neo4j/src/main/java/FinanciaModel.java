@@ -15,7 +15,7 @@ public class FinanciaModel {
 
     public void create(FinanciaBean f) {
         try (Session session = driver.session()) {
-            String cypher = "MATCH (i:Instituicao {id: $idInstituicao}), (p:Projeto {id: $idProjeto}) " +
+            String cypher = "MATCH (i:Instituicao {idInstituicao: $idInstituicao}), (p:Projeto {idProjeto: $idProjeto}) " +
                     "MERGE (i)-[:FINANCIA]->(p)";
             session.writeTransaction(tx -> tx.run(cypher,
                     Values.parameters("idInstituicao", f.getIdInstituicao(),
@@ -28,8 +28,8 @@ public class FinanciaModel {
         Set<FinanciaBean> list = new HashSet<>();
 
         String cypher = "MATCH (i:Instituicao)-[:FINANCIA]->(p:Projeto) " +
-                "RETURN i.id AS idInstituicao, i.nome AS nomeInstituicao, " +
-                "p.id AS idProjeto, p.titulo AS nomeProjeto";
+                "RETURN i.idInstituicao AS idInstituicao, i.nome AS nomeInstituicao, " +
+                "p.idProjeto AS idProjeto, p.titulo AS nomeProjeto";
 
         try (Session session = driver.session()) {
             session.readTransaction(tx -> {
@@ -53,7 +53,7 @@ public class FinanciaModel {
 
     public void remove(int idInstituicao, int idProjeto) {
         try (Session session = driver.session()) {
-            String cypher = "MATCH (i:Instituicao {id: $idInstituicao})-[f:FINANCIA]->(p:Projeto {id: $idProjeto}) " +
+            String cypher = "MATCH (i:Instituicao {idInstituicao: $idInstituicao})-[f:FINANCIA]->(p:Projeto {idProjeto: $idProjeto}) " +
                     "DELETE f";
             session.writeTransaction(tx -> tx.run(cypher,
                     Values.parameters("idInstituicao", idInstituicao,
