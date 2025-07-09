@@ -1,0 +1,88 @@
+// ===== Criar Instituicoes =====
+CREATE (:Instituicao {idInstituicao: 1, nome: 'Universidade de São Paulo', tipo: 'Universidade', pais: 'Brasil'});
+CREATE (:Instituicao {idInstituicao: 2, nome: 'Instituto Nacional de Pesquisas Espaciais', tipo: 'Instituto', pais: 'Brasil'});
+CREATE (:Instituicao {idInstituicao: 3, nome: 'Massachusetts Institute of Technology', tipo: 'Universidade', pais: 'EUA'});
+
+// ===== Criar Pesquisadores =====
+CREATE (:Pesquisador {idPesquisador: 1, nome: 'Dra. Ana Paula Mendes', email: 'ana.mendes@usp.br', instituicao: 'Universidade de São Paulo'});
+CREATE (:Pesquisador {idPesquisador: 2, nome: 'Dr. Carlos Silva', email: 'carlos.silva@inpe.br', instituicao: 'Instituto Nacional de Pesquisas Espaciais'});
+CREATE (:Pesquisador {idPesquisador: 3, nome: 'Dr. Julia Hart', email: 'julia.hart@mit.edu', instituicao: 'Massachusetts Institute of Technology'});
+
+// ===== Criar Projetos =====
+CREATE (:Projeto {idProjeto: 1, titulo: 'Análise de Dados Genômicos', areaPesquisa: 'Bioinformática', dataInicio: date('2023-01-10'), dataFim: date('2024-12-15')});
+CREATE (:Projeto {idProjeto: 2, titulo: 'Otimização de Redes Neurais', areaPesquisa: 'Inteligência Artificial', dataInicio: date('2022-08-01'), dataFim: date('2025-01-30')});
+CREATE (:Projeto {idProjeto: 3, titulo: 'Sustentabilidade Urbana com IoT', areaPesquisa: 'Tecnologia Ambiental', dataInicio: date('2024-03-15'), dataFim: date('2026-03-14')});
+
+// ===== Criar Orientandos =====
+CREATE (:Orientando {idOrientando: 1, nome: 'Lucas Fernandes', email: 'lucas.fernandes@aluno.usp.br', nivelAcademico: 'Mestrado'});
+CREATE (:Orientando {idOrientando: 2, nome: 'Carla Borges', email: 'carla.borges@aluno.inpe.br', nivelAcademico: 'Doutorado'});
+CREATE (:Orientando {idOrientando: 3, nome: 'Felipe Souza', email: 'felipe.souza@aluno.mit.edu', nivelAcademico: 'Graduação'});
+
+// ===== Criar Publicacoes =====
+CREATE (:Publicacao {idPublicacao: 1, titulo: 'Métodos de Clusterização em Genômica', tipo: 'Artigo Científico', dataPublicacao: date('2024-01-10'), doi: '10.1234/genomics.001'});
+CREATE (:Publicacao {idPublicacao: 2, titulo: 'Redes Neurais Profundas em Ambientes Reais', tipo: 'Conferência', dataPublicacao: date('2023-11-20'), doi: '10.1234/ia.002'});
+CREATE (:Publicacao {idPublicacao: 3, titulo: 'Cidades Inteligentes com IoT Sustentável', tipo: 'Artigo Científico', dataPublicacao: date('2025-05-06'), doi: '10.1234/iot.003'});
+
+// ===== Criar relacionamentos financia (Instituicao)-[:FINANCIA]->(Projeto) =====
+MATCH (i:Instituicao {idInstituicao: 2}), (p:Projeto {idProjeto: 2})
+CREATE (i)-[:FINANCIA]->(p);
+MATCH (i:Instituicao {idInstituicao: 3}), (p:Projeto {idProjeto: 3})
+CREATE (i)-[:FINANCIA]->(p);
+MATCH (i:Instituicao {idInstituicao: 1}), (p:Projeto {idProjeto: 3})
+CREATE (i)-[:FINANCIA]->(p);
+
+// ===== Criar relacionamentos orientando participa projeto =====
+MATCH (o:Orientando {idOrientando: 1}), (p:Projeto {idProjeto: 1})
+CREATE (o)-[:PARTICIPA_EM]->(p);
+MATCH (o:Orientando {idOrientando: 2}), (p:Projeto {idProjeto: 2})
+CREATE (o)-[:PARTICIPA_EM]->(p);
+MATCH (o:Orientando {idOrientando: 3}), (p:Projeto {idProjeto: 3})
+CREATE (o)-[:PARTICIPA_EM]->(p);
+
+// ===== Criar relacionamentos participa_projeto (Pesquisador)-[:PARTICIPA]->(Projeto) com propriedade papel =====
+MATCH (pes:Pesquisador {idPesquisador: 1}), (p:Projeto {idProjeto: 1})
+CREATE (pes)-[:PARTICIPA {papel: 'Coordenador'}]->(p);
+MATCH (pes:Pesquisador {idPesquisador: 2}), (p:Projeto {idProjeto: 1})
+CREATE (pes)-[:PARTICIPA {papel: 'Pesquisador Convidado'}]->(p);
+MATCH (pes:Pesquisador {idPesquisador: 2}), (p:Projeto {idProjeto: 2})
+CREATE (pes)-[:PARTICIPA {papel: 'Coordenador'}]->(p);
+MATCH (pes:Pesquisador {idPesquisador: 3}), (p:Projeto {idProjeto: 2})
+CREATE (pes)-[:PARTICIPA {papel: 'Pesquisador Convidado'}]->(p);
+MATCH (pes:Pesquisador {idPesquisador: 3}), (p:Projeto {idProjeto: 3})
+CREATE (pes)-[:PARTICIPA {papel: 'Coordenador'}]->(p);
+
+// ===== Criar relacionamentos projeto coordenado por pesquisador =====
+MATCH (p:Projeto), (pes:Pesquisador)
+WHERE p.idCoordenador = pes.idPesquisador
+CREATE (p)-[:COORDENADO_POR]->(pes);
+
+// ===== Criar relacionamentos projeto pertence a instituicao =====
+MATCH (p:Projeto), (i:Instituicao)
+WHERE p.idInstituicao = i.idInstituicao
+CREATE (p)-[:PERTENCE_A]->(i);
+
+// ===== Criar relacionamentos publicacao pertence a projeto =====
+MATCH (pub:Publicacao), (p:Projeto)
+WHERE pub.idProjeto = p.idProjeto
+CREATE (pub)-[:PERTENCE_A]->(p);
+
+// ===== Criar constraints de unicidade =====
+CREATE CONSTRAINT unique_idInstituicao IF NOT EXISTS
+FOR (i:Instituicao)
+REQUIRE i.idInstituicao IS UNIQUE;
+
+CREATE CONSTRAINT unique_idPesquisador IF NOT EXISTS
+FOR (p:Pesquisador)
+REQUIRE p.idPesquisador IS UNIQUE;
+
+CREATE CONSTRAINT unique_idProjeto IF NOT EXISTS
+FOR (p:Projeto)
+REQUIRE p.idProjeto IS UNIQUE;
+
+CREATE CONSTRAINT unique_idOrientando IF NOT EXISTS
+FOR (o:Orientando)
+REQUIRE o.idOrientando IS UNIQUE;
+
+CREATE CONSTRAINT unique_idPublicacao IF NOT EXISTS
+FOR (pub:Publicacao)
+REQUIRE pub.idPublicacao IS UNIQUE;
