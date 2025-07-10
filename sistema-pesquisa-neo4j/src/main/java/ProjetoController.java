@@ -1,19 +1,21 @@
-import org.neo4j.driver.Driver;
+import org.neo4j.driver.*;
 import org.neo4j.driver.Record;
-import org.neo4j.driver.Result;
-import org.neo4j.driver.Session;
+import org.neo4j.driver.types.TypeSystem;
 
 import java.sql.Date;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.concurrent.CompletionStage;
 
 public class ProjetoController {
 
     private final ProjetoModel model;
     private final PesquisadorController pesquisadorController;
     private final InstituicaoController instituicaoController;
+    private Driver driver;
 
     public ProjetoController(Driver driver) {
+        this.driver = driver;
         this.model = new ProjetoModel(driver);
         this.pesquisadorController = new PesquisadorController(driver);
         this.instituicaoController = new InstituicaoController(driver);
@@ -47,18 +49,35 @@ public class ProjetoController {
 
         int idProjeto = model.getNextId();
 
-        ProjetoBean projeto = new ProjetoBean(idProjeto, titulo, areaPesquisa, dataInicio, dataFim);
+        ProjetoBean projeto = new ProjetoBean(idProjeto, idCoordenador, idInstituicao, titulo, areaPesquisa, dataInicio, dataFim);
         model.create(projeto);
 
         System.out.println("Projeto cadastrado com sucesso!");
     }
 
     public void listarProjetos() {
-        Set<ProjetoBean> todos = model.listAll();
-        System.out.println("ID | Título | Área Pesquisa | Data Início | Data Fim");
-        System.out.println("---------------------------------------------------------------------------------");
-        for (ProjetoBean p : todos) {
-            System.out.println(p);
+        try (Session session = driver.session()) {
+            String cypher = "MATCH (p:Projeto)-[:COORDENADO_POR]->(pesq:Pesquisador) " +
+                    "RETURN p.idProjeto AS idProjeto, p.titulo AS titulo, " +
+                    "pesq.idPesquisador AS idCoordenador, pesq.nome AS nomeCoordenador";
+
+            session.readTransaction(tx -> {
+                Result result = tx.run(cypher);
+                System.out.println("Projetos com seus respectivos coordenadores:\n");
+                while (result.hasNext()) {
+                    Record record = result.next();
+                    int idProjeto = record.get("idProjeto").asInt();
+                    String titulo = record.get("titulo").asString();
+                    int idCoordenador = record.get("idCoordenador").asInt();
+                    String nomeCoordenador = record.get("nomeCoordenador").asString();
+
+                    System.out.println("Projeto ID: " + idProjeto + " | Título: " + titulo +
+                            " | Coordenador ID: " + idCoordenador + " | Nome: " + nomeCoordenador);
+                }
+                return null;
+            });
+        } catch (Exception e) {
+            System.out.println("Erro ao listar projetos com coordenadores: " + e.getMessage());
         }
     }
 

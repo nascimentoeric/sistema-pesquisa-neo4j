@@ -22,57 +22,82 @@ public class ProjetoModel {
     public void create(ProjetoBean projeto) {
         try (Session session = driver.session()) {
 
-            String cypher = "CREATE (p:Projeto {idProjeto: $idProjeto, idCoordenador: $idCoordenador, idInstituicao: $idInstituicao, " +
-                    "titulo: $titulo, areaPesquisa: $areaPesquisa, dataInicio: $dataInicio, dataFim: $dataFim})";
-
-            session.writeTransaction(tx -> tx.run(cypher,
-                    Values.parameters(
-                            "idProjeto", projeto.getIdProjeto(),
-                            //"idCoordenador", projeto.getIdCoordenador(),
-                            //"idInstituicao", projeto.getIdInstituicao(),
-                            "titulo", projeto.getTitulo(),
-                            "areaPesquisa", projeto.getAreaPesquisa(),
-                            "dataInicio", projeto.getDataInicio().toLocalDate(),
-                            "dataFim", projeto.getDataFim().toLocalDate()
-                    )));
-        }
-    }
-
-    public Set<ProjetoBean> listAll() {
-        Set<ProjetoBean> list = new HashSet<>();
-
-        String cypher = "MATCH (p:Projeto)-[:COORDENADO_POR]->(pesq:Pesquisador) " +
-                "RETURN p, pesq.idPesquisador AS idCoordenador";
-
-        try (Session session = driver.session()) {
-            session.readTransaction(tx -> {
-                Result result = tx.run(cypher);
-                while (result.hasNext()) {
-                    Record record = result.next();
-                    Node projNode = record.get("p").asNode();
-
-                    ProjetoBean p = new ProjetoBean(
-                            projNode.get("idProjeto").asInt(),
-                            //record.get("idCoordenador").asInt(),
-                            //projNode.get("idInstituicao").asInt(),
-                            projNode.get("titulo").asString(),
-                            projNode.get("areaPesquisa").asString(),
-                            Date.valueOf(projNode.get("dataInicio").asLocalDate()),
-                            Date.valueOf(projNode.get("dataFim").asLocalDate())
-                    );
-                    list.add(p);
-                }
-                return null;
+            String checkIdCypher = "MATCH (p:Projeto {idProjeto: $idProjeto}) RETURN p LIMIT 1";
+            boolean exists = session.readTransaction(tx -> {
+                Result result = tx.run(checkIdCypher, Values.parameters("idProjeto", projeto.getIdProjeto()));
+                return result.hasNext();
             });
+
+            int idParaUsar = projeto.getIdProjeto();
+
+            if (exists) {
+                String maxIdCypher = "MATCH (p:Projeto) RETURN COALESCE(MAX(p.idProjeto), 0) + 1 AS nextId";
+                idParaUsar = session.readTransaction(tx -> {
+                    Result result = tx.run(maxIdCypher);
+                    return result.single().get("nextId").asInt();
+                });
+                System.out.println("ID informado já existe. Usando novo ID: " + idParaUsar);
+            }
+
+            String createProjetoCypher = "CREATE (p:Projeto {idProjeto: $idProjeto, titulo: $titulo, areaPesquisa: $areaPesquisa, dataInicio: $dataInicio, dataFim: $dataFim})";
+            int finalId = idParaUsar;
+            session.writeTransaction(tx -> tx.run(createProjetoCypher, Values.parameters(
+                    "idProjeto", finalId,
+                    "titulo", projeto.getTitulo(),
+                    "areaPesquisa", projeto.getAreaPesquisa(),
+                    "dataInicio", projeto.getDataInicio().toLocalDate(),
+                    "dataFim", projeto.getDataFim().toLocalDate()
+            )).consume());
+
+
+            String coordenaCypher = "MATCH (p:Projeto {idProjeto: $idProjeto}), (pes:Pesquisador {idPesquisador: $idCoordenador}) " +
+                    "MERGE (p)-[:COORDENADO_POR]->(pes)";
+            session.writeTransaction(tx -> tx.run(coordenaCypher, Values.parameters(
+                    "idProjeto", finalId,
+                    "idCoordenador", projeto.getIdCoordenador()
+            )).consume());
+
+
+            projeto.setIdProjeto(finalId);
         }
-        return list;
     }
+
+
+//    public Set<ProjetoBean> listAll() {
+//        Set<ProjetoBean> list = new HashSet<>();
+//
+//        String cypher = "MATCH (p:Projeto)-[:COORDENADO_POR]->(pesq:Pesquisador) " +
+//                "RETURN p, pesq.idPesquisador AS idCoordenador";
+//
+//        try (Session session = driver.session()) {
+//            session.readTransaction(tx -> {
+//                Result result = tx.run(cypher);
+//                while (result.hasNext()) {
+//                    Record record = result.next();
+//                    Node projNode = record.get("p").asNode();
+//
+//                    ProjetoBean p = new ProjetoBean(
+//                            projNode.get("idProjeto").asInt(),
+//                            record.get("idCoordenador").asInt(),
+//                            projNode.get("idInstituicao").asInt(),
+//                            projNode.get("titulo").asString(),
+//                            projNode.get("areaPesquisa").asString(),
+//                            Date.valueOf(projNode.get("dataInicio").asLocalDate()),
+//                            Date.valueOf(projNode.get("dataFim").asLocalDate())
+//                    );
+//                    list.add(p);
+//                }
+//                return null;
+//            });
+//        }
+//        return list;
+//    }
 
 
     public void remove(int idProjeto) {
         try (Session session = driver.session()) {
             String cypher = "MATCH (p:Projeto {idProjeto: $idProjeto}) DETACH DELETE p";
-            session.writeTransaction(tx -> tx.run(cypher, Values.parameters("id", idProjeto)));
+            session.writeTransaction(tx -> tx.run(cypher, Values.parameters("idProjeto", idProjeto)).consume());
         }
     }
 

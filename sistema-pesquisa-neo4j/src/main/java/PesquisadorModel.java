@@ -18,16 +18,42 @@ public class PesquisadorModel {
 
     public void create(PesquisadorBean p) {
         try (Session session = driver.session()) {
-            String cypher = "CREATE (pes:Pesquisador {idPesquisador: $idPesquisador, nome: $nome, email: $email, instituicao: $instituicao})";
-            session.writeTransaction(tx -> tx.run(cypher,
-                    Values.parameters(
-                            "idPesquisador", p.getIdPesquisador(),
-                            "nome", p.getNome(),
-                            "email", p.getEmail(),
-                            "instituicao", p.getInstituicao()
-                    )));
+            String checkCypher = "MATCH (pes:Pesquisador {idPesquisador: $idPesquisador}) RETURN pes LIMIT 1";
+            boolean exists = session.readTransaction(tx -> {
+                Result result = tx.run(checkCypher, Values.parameters("idPesquisador", p.getIdPesquisador()));
+                return result.hasNext();
+            });
+
+            int idParaUsar = p.getIdPesquisador();
+
+            if (exists) {
+                String maxIdCypher = "MATCH (pes:Pesquisador) RETURN COALESCE(MAX(pes.idPesquisador), 0) + 1 AS nextId";
+                idParaUsar = session.readTransaction(tx -> {
+                    Result result = tx.run(maxIdCypher);
+                    int nextId = 0;
+                    if (result.hasNext()) {
+                        nextId = result.next().get("nextId").asInt();
+                    }
+                    return nextId;
+                });
+                System.out.println("ID informado já existe. Usando novo ID: " + idParaUsar);
+            }
+
+            String createCypher = "CREATE (pes:Pesquisador {idPesquisador: $idPesquisador, nome: $nome, email: $email, instituicao: $instituicao})";
+            int finalIdParaUsar = idParaUsar;
+            session.writeTransaction(tx -> {
+                tx.run(createCypher,
+                        Values.parameters(
+                                "idPesquisador", finalIdParaUsar,
+                                "nome", p.getNome(),
+                                "email", p.getEmail(),
+                                "instituicao", p.getInstituicao()
+                        )).consume();
+                return null;
+            });
         }
     }
+
 
     public Set<PesquisadorBean> listAll() {
         Set<PesquisadorBean> list = new HashSet<>();
@@ -56,7 +82,10 @@ public class PesquisadorModel {
     public void remove(int idPesquisador) {
         try (Session session = driver.session()) {
             String cypher = "MATCH (pes:Pesquisador {idPesquisador: $idPesquisador}) DETACH DELETE pes";
-            session.writeTransaction(tx -> tx.run(cypher, Values.parameters("id", idPesquisador)));
+            session.writeTransaction(tx -> {
+                tx.run(cypher, Values.parameters("idPesquisador", idPesquisador)).consume();
+                return null;
+            });
         }
     }
 
@@ -69,7 +98,7 @@ public class PesquisadorModel {
                     "nome", p.getNome(),
                     "email", p.getEmail(),
                     "instituicao", p.getInstituicao()
-            )));
+            )).consume());
         }
     }
 }

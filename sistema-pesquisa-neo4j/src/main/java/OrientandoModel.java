@@ -13,19 +13,39 @@ public class OrientandoModel {
 
     public void create(OrientandoBean o) {
         try (Session session = driver.session()) {
+
+            String checkCypher = "MATCH (o:Orientando {idOrientando: $idOrientando}) RETURN o LIMIT 1";
+            boolean exists = session.readTransaction(tx -> {
+                Result result = tx.run(checkCypher, Values.parameters("idOrientando", o.getIdOrientando()));
+                return result.hasNext();
+            });
+
+            int idParaUsar = o.getIdOrientando();
+
+            if (exists) {
+                String nextIdCypher = "MATCH (o:Orientando) RETURN COALESCE(MAX(o.idOrientando), 0) + 1 AS nextId";
+                idParaUsar = session.readTransaction(tx -> {
+                    Result result = tx.run(nextIdCypher);
+                    return result.single().get("nextId").asInt();
+                });
+                System.out.println("ID já existe. Novo ID atribuído: " + idParaUsar);
+            }
+
+
+            int finalIdParaUsar = idParaUsar;
             session.writeTransaction(tx -> {
                 tx.run("CREATE (o:Orientando {idOrientando: $idOrientando, nome: $nome, email: $email, nivelAcademico: $nivelAcademico})",
                         Values.parameters(
-                                "idOrientando", o.getIdOrientando(),
+                                "idOrientando", finalIdParaUsar,
                                 "nome", o.getNome(),
                                 "email", o.getEmail(),
                                 "nivelAcademico", o.getNivelAcademico()
-                                //"idProjeto", o.getIdProjeto()
                         ));
                 return null;
             });
         }
     }
+
 
     public HashSet<OrientandoBean> listAll() {
         HashSet<OrientandoBean> list = new HashSet<>();

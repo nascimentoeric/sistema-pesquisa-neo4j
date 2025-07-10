@@ -31,14 +31,14 @@ public class Principal {
                     case 7: pesquisadorController.removerPesquisador(); break;
                     case 8: instituicaoController.removerInstituicao(); break;
                     case 9: orientandoController.removerOrientando(); break;
-                    case 10: projetoController.removerProjeto(); break;
-                    case 11: publicacaoController.removerPublicacao(); break;
+                    case 10: financiaController.removerFinanciamento(); break;
+                    case 11: projetoController.removerProjeto(); break;
+                    case 12: publicacaoController.removerPublicacao(); break;
 
                     // ALTERAÇÕES
-                    case 12: pesquisadorController.alterarPesquisador(); break;
-                    case 13: instituicaoController.alterarInstituicao(); break;
-                    case 14: orientandoController.alterarOrientando(); break;
-                    case 15: publicacaoController.atualizarPublicacao(); break;
+                    case 13: pesquisadorController.alterarPesquisador(); break;
+                    case 14: instituicaoController.alterarInstituicao(); break;
+                    case 15: orientandoController.alterarOrientando(); break;
 
                     // LISTAGENS BÁSICAS
                     case 16: pesquisadorController.listarPesquisadores(); break;
@@ -68,7 +68,7 @@ public class Principal {
 
     private static int menu() {
         System.out.println("\n============================ MENU ============================\n");
-        System.out.println("SUGESTÃO: Verifique os IDs antes de operações dependentes.\n");
+        System.out.println("SUGESTÃO: Verifique os IDs correspondentes antes de operações que solicitam o mesmo.\n");
 
         System.out.println("INSERÇÕES");
         System.out.println(" 1 - Inserir um novo pesquisador");
@@ -82,14 +82,14 @@ public class Principal {
         System.out.println(" 7 - Remover um pesquisador");
         System.out.println(" 8 - Remover uma instituição");
         System.out.println(" 9 - Remover um orientando");
-        System.out.println("10 - Remover um projeto");
-        System.out.println("11 - Remover uma publicação\n");
+        System.out.println("10 - Remover um financiamento");
+        System.out.println("11 - Remover um projeto");
+        System.out.println("12 - Remover uma publicação\n");
 
         System.out.println("ALTERAÇÕES");
-        System.out.println("12 - Alterar dados de um pesquisador");
-        System.out.println("13 - Alterar dados de uma instituição");
-        System.out.println("14 - Alterar dados de um orientando");
-        System.out.println("15 - Alterar dados de uma publicação\n");
+        System.out.println("13 - Alterar dados de um pesquisador");
+        System.out.println("14 - Alterar dados de uma instituição");
+        System.out.println("15 - Alterar dados de um orientando\n");
 
         System.out.println("LISTAGENS BÁSICAS");
         System.out.println("16 - Listar pesquisadores");
