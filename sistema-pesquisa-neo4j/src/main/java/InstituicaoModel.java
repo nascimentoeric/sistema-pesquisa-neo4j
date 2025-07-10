@@ -19,10 +19,29 @@ public class InstituicaoModel {
 
     public void create(InstituicaoBean a) {
         try (Session session = driver.session()) {
+            String checkCypher = "MATCH (i:Instituicao {idInstituicao: $idInstituicao}) RETURN i LIMIT 1";
+            boolean exists = session.readTransaction(tx -> {
+                Result result = tx.run(checkCypher, parameters("idInstituicao", a.getIdInstituicao()));
+                return result.hasNext();
+            });
+
+            int idParaUsar = a.getIdInstituicao();
+
+            if (exists) {
+                String maxIdCypher = "MATCH (i:Instituicao) RETURN COALESCE(MAX(i.idInstituicao), 0) + 1 AS nextId";
+                idParaUsar = session.readTransaction(tx -> {
+                    Result result = tx.run(maxIdCypher);
+                    return result.single().get("nextId").asInt();
+                });
+                System.out.println("ID já existente. Utilizando novo ID: " + idParaUsar);
+            }
+
+            int finalId = idParaUsar;
+
             session.writeTransaction(tx -> {
                 tx.run("CREATE (i:Instituicao {idInstituicao: $idInstituicao, nome: $nome, tipo: $tipo, pais: $pais})",
                         parameters(
-                                "idInstituicao", a.getIdInstituicao(),
+                                "idInstituicao", finalId,
                                 "nome", a.getNome(),
                                 "tipo", a.getTipo(),
                                 "pais", a.getPais()
@@ -31,6 +50,7 @@ public class InstituicaoModel {
             });
         }
     }
+
 
     public HashSet<InstituicaoBean> listAll() {
         HashSet<InstituicaoBean> list = new HashSet<>();

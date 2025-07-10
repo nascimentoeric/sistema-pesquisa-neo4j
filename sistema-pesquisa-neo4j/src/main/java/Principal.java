@@ -68,7 +68,7 @@ public class Principal {
 
     private static int menu() {
         System.out.println("\n============================ MENU ============================\n");
-        System.out.println("SUGESTÃO: Verifique os IDs antes de operações dependentes.\n");
+        System.out.println("SUGESTÃO: Verifique os IDs correspondentes antes de operações que solicitam o mesmo.\n");
 
         System.out.println("INSERÇÕES");
         System.out.println(" 1 - Inserir um novo pesquisador");

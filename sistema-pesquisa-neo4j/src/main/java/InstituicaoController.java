@@ -8,9 +8,11 @@ import java.util.Scanner;
 public class InstituicaoController {
 
     private final Driver driver;
+    private final InstituicaoModel model;
 
     public InstituicaoController(Driver driver) {
         this.driver = driver;
+        this.model = new InstituicaoModel(driver);
     }
 
     public void criarInstituicao() {
@@ -26,21 +28,13 @@ public class InstituicaoController {
         System.out.print("País: ");
         String pais = input.nextLine();
 
-        try (Session session = driver.session()) {
-            session.writeTransaction(tx -> {
-                tx.run("CREATE (i:Instituicao {idInstituicao: $idInstituicao, nome: $nome, tipo: $tipo, pais: $pais})",
-                        org.neo4j.driver.Values.parameters(
-                                "idInstituicao", id,
-                                "nome", nome,
-                                "tipo", tipo,
-                                "pais", pais
-                        ));
-                return null;
-            });
-        }
+        InstituicaoBean instituicao = new InstituicaoBean(id, nome, tipo, pais);
+
+        model.create(instituicao);
 
         System.out.println("Instituição cadastrada com sucesso!");
     }
+
 
     public void listarInstituicoes() {
         try (Session session = driver.session()) {
@@ -69,7 +63,7 @@ public class InstituicaoController {
         try (Session session = driver.session()) {
             session.writeTransaction(tx -> {
                 tx.run("MATCH (i:Instituicao {idInstituicao: $idInstituicao}) DETACH DELETE i",
-                        org.neo4j.driver.Values.parameters("id", id));
+                        org.neo4j.driver.Values.parameters("idInstituicao", id));
                 return null;
             });
         }
