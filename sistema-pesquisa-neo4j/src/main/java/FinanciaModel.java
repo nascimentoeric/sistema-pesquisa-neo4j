@@ -19,7 +19,7 @@ public class FinanciaModel {
                     "MERGE (i)-[:FINANCIA]->(p)";
             session.writeTransaction(tx -> tx.run(cypher,
                     Values.parameters("idInstituicao", f.getIdInstituicao(),
-                            "idProjeto", f.getIdProjeto())));
+                            "idProjeto", f.getIdProjeto())).consume());
         }
     }
 
@@ -57,7 +57,7 @@ public class FinanciaModel {
                     "DELETE f";
             session.writeTransaction(tx -> tx.run(cypher,
                     Values.parameters("idInstituicao", idInstituicao,
-                            "idProjeto", idProjeto)));
+                            "idProjeto", idProjeto)).consume());
         }
     }
 }

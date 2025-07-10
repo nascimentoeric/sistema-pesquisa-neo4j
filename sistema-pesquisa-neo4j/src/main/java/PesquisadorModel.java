@@ -98,7 +98,7 @@ public class PesquisadorModel {
                     "nome", p.getNome(),
                     "email", p.getEmail(),
                     "instituicao", p.getInstituicao()
-            )));
+            )).consume());
         }
     }
 }

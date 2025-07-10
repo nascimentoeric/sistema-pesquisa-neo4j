@@ -1,4 +1,5 @@
-import org.neo4j.driver.Driver;
+import org.neo4j.driver.*;
+import org.neo4j.driver.Record;
 
 import java.sql.Date;
 import java.util.HashSet;
@@ -7,19 +8,40 @@ import java.util.Scanner;
 public class PublicacaoController {
 
     private final PublicacaoModel model;
+    private Driver driver;
 
     public PublicacaoController(Driver driver) {
         this.model = new PublicacaoModel(driver);
+        this.driver = driver;
     }
 
     public void criarPublicacao() {
         Scanner input = new Scanner(System.in);
         try {
-            System.out.println("Insira os dados da publicação:");
 
+            try (Session session = driver.session()) {
+                session.readTransaction(tx -> {
+                    String cypher = "MATCH (p:Projeto) RETURN p.idProjeto AS idProjeto, p.titulo AS titulo, p.areaPesquisa AS areaPesquisa, p.dataInicio AS dataInicio, p.dataFim AS dataFim";
+                    Result result = tx.run(cypher);
+
+                    System.out.println("Projetos disponíveis:");
+                    while (result.hasNext()) {
+                        Record record = result.next();
+                        System.out.println("ID: " + record.get("idProjeto").asInt() +
+                                " | Título: " + record.get("titulo").asString() +
+                                " | Área: " + record.get("areaPesquisa").asString() +
+                                " | Início: " + record.get("dataInicio").asLocalDate() +
+                                " | Fim: " + record.get("dataFim").asLocalDate());
+                    }
+                    return null;
+                });
+            }
+
+
+            System.out.println("\nInsira os dados da publicação:");
             System.out.print("ID do Projeto: ");
             int idProjeto = input.nextInt();
-            input.nextLine(); // limpar buffer
+            input.nextLine();
 
             System.out.print("Título: ");
             String titulo = input.nextLine();
@@ -34,7 +56,28 @@ public class PublicacaoController {
             System.out.print("DOI: ");
             String doi = input.nextLine();
 
-            PublicacaoBean p = new PublicacaoBean(0, idProjeto, titulo, tipo, dataPublicacao, doi);
+            int idGerado;
+
+            try (Session session = driver.session()) {
+                boolean existeId = session.readTransaction(tx -> {
+                    String check = "MATCH (pub:Publicacao {idPublicacao: $id}) RETURN pub LIMIT 1";
+                    Result result = tx.run(check, Values.parameters("id", idProjeto));
+                    return result.hasNext();
+                });
+
+                if (existeId) {
+                    idGerado = session.readTransaction(tx -> {
+                        String maxIdQuery = "MATCH (pub:Publicacao) RETURN COALESCE(MAX(pub.idPublicacao), 0) + 1 AS nextId";
+                        Result result = tx.run(maxIdQuery);
+                        return result.next().get("nextId").asInt();
+                    });
+                    System.out.println("ID já em uso. Usando ID gerado automaticamente: " + idGerado);
+                } else {
+                    idGerado = idProjeto;
+                }
+            }
+
+            PublicacaoBean p = new PublicacaoBean(idGerado, idProjeto, titulo, tipo, dataPublicacao, doi);
             model.create(p);
 
             System.out.println("Publicação cadastrada com sucesso! ID gerado: " + p.getIdPublicacao());
@@ -42,6 +85,8 @@ public class PublicacaoController {
             System.out.println("Erro ao criar publicação: " + e.getMessage());
         }
     }
+
+
 
     public void listarPublicacoes() {
         HashSet<PublicacaoBean> publicacoes = model.listAll();
