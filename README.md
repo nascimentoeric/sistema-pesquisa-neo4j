@@ -36,11 +36,12 @@ Utiliza um **driver** para se conectar a um banco de dados **Neo4J**.
 #### 1. Clone o repositório para um repositório seu local.
 #### 2. Crie uma database no Neo4J com o nome desejado, definindo uma senha.
 #### 3. Abra a pasta database do projeto.
-#### 4. Abra especificamente o arquivo dump_neo4j.txt com um editor de texto e copie o script. (CTRL + A -> CTRL + C)
+#### 4. Abra o arquivo dump_neo4j.txt com um editor de texto e copie o script. (CTRL + A -> CTRL + C)
 #### 5. Abra a Query Tool dentro da database criada no Neo4J, cole o script e execute selecionando tudo.
-#### 6. Abra o projeto na IDE desejada. (recomendado IntelliJ)
-#### 7. Modifique dentro do arquivo Conexao.java as variáveis user e senha para o usuário e senha do seu banco do Neo4J.
-#### 8. Ainda no Conexao.java, modifique o uri para o uri da sua database. Exemplo: "neo4j://999.0.0.0:7777"
-#### 9. Como o projeto foi gerado em Maven, as dependências são todas gerenciadas dentro do arquivo pom.xml, por isso
+#### 6. Repita o mesmo processo para o constraints_chaves.txt.
+#### 7. Abra o projeto na IDE desejada. (recomendado IntelliJ)
+#### 8. Modifique dentro do arquivo Conexao.java as variáveis user e senha para o usuário e senha do seu banco do Neo4J.
+#### 9. Ainda no Conexao.java, modifique o uri para o uri da sua database. Exemplo: "neo4j://999.0.0.0:7777"
+#### 10. Como o projeto foi gerado em Maven, as dependências são todas gerenciadas dentro do arquivo pom.xml, por isso
 não é necessário configurar nenhum driver.
-#### 10. Salve e execute a classe Principal.java para começar a utilizar.
+#### 11. Salve e execute a classe Principal.java para começar a utilizar.
