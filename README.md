@@ -42,6 +42,5 @@ Utiliza um **driver** para se conectar a um banco de dados **Neo4J**.
 #### 7. Abra o projeto na IDE desejada. (recomendado IntelliJ)
 #### 8. Modifique dentro do arquivo Conexao.java as variáveis user e senha para o usuário e senha do seu banco do Neo4J.
 #### 9. Ainda no Conexao.java, modifique o uri para o uri da sua database. Exemplo: "neo4j://999.0.0.0:7777"
-#### 10. Como o projeto foi gerado em Maven, as dependências são todas gerenciadas dentro do arquivo pom.xml, por isso
-não é necessário configurar nenhum driver.
+#### 10. Como o projeto foi gerado em Maven, as dependências são todas gerenciadas dentro do arquivo pom.xml, por isso não é necessário configurar nenhum driver.
 #### 11. Salve e execute a classe Principal.java para começar a utilizar.
